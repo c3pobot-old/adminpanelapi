@@ -1,0 +1,37 @@
+{
+  "name": "adminpanelapi",
+  "version": "1.0.0",
+  "description": "api for admin panel",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update": "chmod a+x updategitdependency.sh && ./updategitdependency.sh",
+    "build": "chmod a+x buildtestimage.sh && ./buildtestimage.sh c3pobot-old/adminpanelapi",
+    "prod": "chmod a+x buildprodimage.sh && ./buildprodimage.sh c3pobot-old/adminpanelapi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/c3po-shard/adminpanelapi.git"
+  },
+  "author": "scuba751",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/c3po-shard/adminpanelapi/issues"
+  },
+  "homepage": "https://gitlab.com/c3po-shard/adminpanelapi#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "botrequest": "github:c3pobot/botrequest",
+    "compression": "^1.7.4",
+    "crypto-js": "^4.1.1",
+    "express": "^4.17.2",
+    "got": "^11.8.2",
+    "http-proxy-middleware": "^2.0.6",
+    "json-array-sorter": "0.0.5",
+    "logger": "github:c3pobot/logger",
+    "mongoclient": "github:c3pobot/mongoclient",
+    "node-fetch": "^2.6.12",
+    "redisclient": "github:c3pobot/redisclient",
+    "s3client": "github:c3pobot/s3client"
+  }
+}
