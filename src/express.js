@@ -4,22 +4,21 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const path = require('path');
-const { createProxyMiddleware } = require('http-proxy-middleware')
+const nocache = require('nocache')
 
 const app = express()
 
-const S3_PUBLIC_URL = process.env.S3_PUBLIC_URL
+const que = require('./que')
+
+app.set('etag', false);
+app.use(nocache());
+
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID
 const PORT = process.env.PORT || 3000
 
 const Cmds = require('./cmds')
 const { DecryptId } = require('./helpers')
 
-let imgProxy
-if(S3_PUBLIC_URL) imgProxy = createProxyMiddleware({
-  target: S3_PUBLIC_URL,
-  secure: false
-})
 app.use(bodyParser.json({
   limit: '1000MB',
   verify: (req, res, buf)=>{
@@ -27,12 +26,10 @@ app.use(bodyParser.json({
   }
 }))
 app.use(compression())
-if(imgProxy){
-  app.use('/asset', imgProxy)
-  app.use('/portrait', imgProxy)
-  app.use('/thumbnail', imgProxy)
-}
-app.use(express.static(path.join(__dirname, 'webapp')));
+
+app.get('/portrait', express.static(path.join(__dirname, 'public', 'portrait')))
+app.get('/thumbnail', express.static(path.join(__dirname, 'public', 'thumbnail')))
+app.get('/asset', express.static(path.join(__dirname, 'public', 'asset')))
 
 app.get('/healthz', (req, res)=>{
   res.json({status: 'health check success'}).status(200)
@@ -41,9 +38,13 @@ app.get('/healthz', (req, res)=>{
 app.post('/api', (req, res)=>{
   handleRequest(req, res)
 })
+app.use('/bull', que.getRouter());
+//app.use('/*', webProxy)
+/*
 app.get('/*', (req, res)=>{
   res.sendFile(path.join(__dirname, 'webapp', 'index.html'));
 })
+*/
 const server = app.listen(PORT, ()=>{
   log.info(`adminpanelapi is listening on ${server.address().port}`)
 })

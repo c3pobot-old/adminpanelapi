@@ -1,14 +1,14 @@
 'use strict'
+const log = require('logger')
+const path = require('path')
+const fs = require('fs')
 module.exports = async(obj = {})=>{
   try{
-    if(obj.baseId && obj.type){
-      if(obj.baseId === 'all'){
-        return await mongo.find(obj.type, {})
-      }else{
-        return (await mongo.find(obj.type, {_id: obj.baseId}))[0]
-      }
+    if(obj.iconKey && obj.type){
+      let file = await fs.readFileSync(path.join(baseDir, 'src', 'public', obj.type, `${obj.iconKey}.png`))
+      if(file) return file.toString('base64')
     }
   }catch(e){
-    console.error(e);
+    log.error(e);
   }
 }
