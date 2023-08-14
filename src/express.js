@@ -3,6 +3,7 @@ const log = require('logger')
 const express = require('express')
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const { createProxyMiddleware } = require('http-proxy-middleware')
 const path = require('path');
 const nocache = require('nocache')
 
@@ -14,7 +15,13 @@ app.set('etag', false);
 app.use(nocache());
 
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID
-const PORT = process.env.PORT || 3000
+const PORT = +process.env.PORT || 3000
+
+let webProxy
+if(process.env.WEB_SVC_URI) webProxy = createProxyMiddleware({
+  target: process.env.WEB_SVC_URI,
+  secure: false
+})
 
 const Cmds = require('./cmds')
 const { DecryptId } = require('./helpers')
@@ -39,12 +46,8 @@ app.post('/api', (req, res)=>{
   handleRequest(req, res)
 })
 app.use('/bull', que.getRouter());
-//app.use('/*', webProxy)
-/*
-app.get('/*', (req, res)=>{
-  res.sendFile(path.join(__dirname, 'webapp', 'index.html'));
-})
-*/
+if(webProxy) app.use('/*', webProxy)
+
 const server = app.listen(PORT, ()=>{
   log.info(`adminpanelapi is listening on ${server.address().port}`)
 })
