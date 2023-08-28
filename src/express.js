@@ -3,25 +3,18 @@ const log = require('logger')
 const express = require('express')
 const bodyParser = require('body-parser');
 const compression = require('compression');
+const cookieParser = require('cookie-parser');
 const { createProxyMiddleware } = require('http-proxy-middleware')
 const path = require('path');
 const nocache = require('nocache')
 
 const app = express()
 
-const que = require('./que')
-
 app.set('etag', false);
 app.use(nocache());
-
+app.use(cookieParser());
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID
 const PORT = +process.env.PORT || 3000
-
-let webProxy
-if(process.env.WEB_SVC_URI) webProxy = createProxyMiddleware({
-  target: process.env.WEB_SVC_URI,
-  secure: false
-})
 
 const Cmds = require('./cmds')
 const { DecryptId } = require('./helpers')
@@ -34,9 +27,9 @@ app.use(bodyParser.json({
 }))
 app.use(compression())
 
-app.get('/portrait', express.static(path.join(__dirname, 'public', 'portrait')))
-app.get('/thumbnail', express.static(path.join(__dirname, 'public', 'thumbnail')))
-app.get('/asset', express.static(path.join(__dirname, 'public', 'asset')))
+app.use('/portrait', express.static(path.join(__dirname, 'public', 'portrait')))
+app.use('/thumbnail', express.static(path.join(__dirname, 'public', 'thumbnail')))
+app.use('/asset', express.static(path.join(__dirname, 'public', 'asset')))
 
 app.get('/healthz', (req, res)=>{
   res.json({status: 'health check success'}).status(200)
@@ -45,8 +38,7 @@ app.get('/healthz', (req, res)=>{
 app.post('/api', (req, res)=>{
   handleRequest(req, res)
 })
-app.use('/bull', que.getRouter());
-if(webProxy) app.use('/*', webProxy)
+//if(webProxy) app.use('/*', webProxy)
 
 const server = app.listen(PORT, ()=>{
   log.info(`adminpanelapi is listening on ${server.address().port}`)
